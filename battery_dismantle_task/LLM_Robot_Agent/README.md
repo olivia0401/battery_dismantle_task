@@ -86,18 +86,35 @@ python3 main.py --mock --complete
 
 **前提条件：**
 - ROS2 Humble已安装
-- skill_server节点正在运行
-- 机器人控制器已启动
+- MoveIt 2已安装
+- 已编译此package：`colcon build --packages-select battery_dismantle_task`
+
+**方式A：使用专用的LLM Agent launch文件（推荐）**
 
 ```bash
-# 终端1: 启动skill_server
-ros2 run battery_dismantle_task skill_server_node \
-    --ros-args -p waypoints_path:=/path/to/config/waypoints.json
+# 终端1: 启动完整系统（自动包含move_group + rviz + skill_server）
+ros2 launch battery_dismantle_task llm_agent.launch.py
 
-# 终端2: 运行LLM Agent
+# 终端2: 等待5秒后，运行LLM Agent
 cd battery_dismantle_task/LLM_Robot_Agent
 python3 main.py
 ```
+
+**方式B：使用fake_execution launch文件（现在也包含skill_server）**
+
+```bash
+# 终端1: 启动系统（已更新，包含skill_server）
+ros2 launch battery_dismantle_task fake_execution.launch.py
+
+# 终端2: 等待5秒后，运行LLM Agent
+cd battery_dismantle_task/LLM_Robot_Agent
+python3 main.py
+```
+
+**注意：**
+- skill_server会在launch后5秒启动（等待move_group初始化）
+- 在终端1看到 `✅ Skill Server Ready!` 后再运行终端2
+- 检查skill_server是否运行：`ros2 node list | grep skill_server`
 
 ### 4. 使用交互式脚本
 
